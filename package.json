@@ -1,0 +1,46 @@
+{
+  "name": "playground-template",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --noEmit",
+    "preview": "vite preview",
+    "publish:summit": "playground deploy --env summit --no-build --buildDir dist --domain playground-template --signer dev --suri \"$MNEMONIC\" --no-contracts --playground --moddable --tag utility"
+  },
+  "dependencies": {
+    "@novasamatech/host-api": "0.8.10",
+    "@novasamatech/host-api-wrapper": "0.8.10",
+    "@parity/product-sdk-address": "^0.1.1",
+    "@parity/product-sdk-chain-client": "^0.7.5",
+    "@parity/product-sdk-crypto": "^0.1.1",
+    "@parity/product-sdk-descriptors": "^0.6.2",
+    "@parity/product-sdk-host": "^0.10.3",
+    "@parity/product-sdk-keys": "^0.3.11",
+    "@parity/product-sdk-logger": "^0.1.1",
+    "@parity/product-sdk-signer": "^0.8.2",
+    "@parity/product-sdk-statement-store": "^0.4.10",
+    "@parity/product-sdk-storage": "^0.1.5",
+    "@parity/product-sdk-utils": "^0.1.1",
+    "polkadot-api": "^2.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "_comment_overrides": "@polkadot-api/json-rpc-provider override is a workaround for an upstream packaging bug (mirrors what product-sdk's monorepo does). @novasamatech/host-api* pinned to exact 0.8.10 to match product-sdk-host@0.10.3, which requires host-api ^0.8.9. NOTE: host-api 0.8.4+ once had a handshake regression against older Polkadot Desktop builds; product-sdk-host@0.10.3 now hard-requires ^0.8.9, indicating it's resolved on current builds — but still verify the Host API connects in Desktop before shipping. If it hangs on 'Polkadot host is not ready', the only safe fallback is the older signer 0.7.0 / host 0.10.0 / host-api 0.8.7 set. ws pinned ^8.21.0 to clear GHSA-96hv-2xvq-fx4p (DoS) in transitive smoldot/@polkadot deps; drop once upstream ranges move past it.",
+  "overrides": {
+    "@novasamatech/host-api": "0.8.10",
+    "@novasamatech/host-api-wrapper": "0.8.10",
+    "@polkadot-api/json-rpc-provider": "^0.2.0",
+    "ws": "^8.21.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.2",
+    "typescript": "^5.9.0",
+    "vite": "^8.0.16"
+  }
+}

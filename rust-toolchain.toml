@@ -1,0 +1,11 @@
+# Pre-pins the Rust toolchain for PVM / pallet-revive contract builds.
+#
+# This template ships frontend-only — there is no contract yet. But it's a
+# blank wrapper you add your own code to, so this is here ready: if you add a
+# Rust contract (a crate + cdm.json), `cargo` / `cdm` will build it with this
+# exact nightly instead of whatever Rust you happen to have installed, keeping
+# builds reproducible across machines and CI. Bump the date as the toolchain
+# moves on.
+[toolchain]
+channel = "nightly-2026-02-01"
+components = ["rust-src"]

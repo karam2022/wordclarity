@@ -1,0 +1,7 @@
+{
+  "domain": "wordcounter-d18d1d",
+  "name": "wordcounter",
+  "description": "Live text stats — words, characters, sentences, and reading time as you type. Plus live writing-sprint rooms: race friends on words written, in real time.",
+  "tag": "utility",
+  "moddedFrom": "wordcounter.dot"
+}

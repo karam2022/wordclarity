@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.car
+.DS_Store
+.dot-mod-setup.log
