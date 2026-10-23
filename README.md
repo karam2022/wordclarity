@@ -1,127 +1,77 @@
-> [!WARNING]
-> The following is a prototype, reference implementation, and proof-of-concept. This open source code is provided for research, experimentation, and developer education only. This code has not been audited, is actively experimental, and may contain bugs, vulnerabilities, or incomplete features. Use at your own risk.
+# WordClarity
 
+A browser writing workspace for seeing the shape of a draft: word counts, reading level, speaking time and phrases worth another look. Write solo, or join a timed writing sprint through a compatible Polkadot host.
 
-# Polkadot Playground
+Built with React, TypeScript, Vite and the Polkadot Product SDK. The current interface calls itself **Word Counter**.
 
-Minimal React + Vite + TypeScript template wired to the Host API for product-account access from a Polkadot host (Mobile, Desktop, or Web). A starting point for building Polkadot dapps.
+## What it does
 
-A live deployment runs at [**playground.dot.li**](https://playground.dot.li) — open it inside a Polkadot host (Mobile, Desktop, or Web) to see the template connect to the Host API, surface the app-scoped product account's SS58 + EVM (H160) addresses, and sign a message end-to-end. Signing is approved on Polkadot Mobile — Desktop and Web relay the request to your paired phone.
+| Tool | What you get |
+| --- | --- |
+| Live counts | Words, characters with and without spaces, sentences, paragraphs and the longest word |
+| Reading and speaking time | Estimates at 200 words per minute for reading and 130 for speaking |
+| Clarity checks | An approximate Flesch-Kincaid reading grade, repeated keywords and a fixed list of phrase flags |
+| Autosave | A saved draft through the host's key-value store, or browser local storage when host storage isn't available |
+| Shared writing sprints | Room codes, a shared countdown and a leaderboard based on words written during the sprint |
 
-## Mod it
+The clarity checks run in the app. There's no language-model API behind the phrase flags, and they can't establish whether a person or AI wrote a text. Reading-grade and phrase rules are English-oriented; they're not validated readability measures for Arabic or other languages. Counts and timing are estimates.
 
-This repo is meant to be forked, gutted, and turned into your own dapp. The pieces you'll most likely want to swap or extend:
+## Browser mode and Polkadot mode
 
-- **Account panel** ([src/App.tsx](src/App.tsx)) — replace the address display + sign demo with whatever your app actually does. The `SignDemo` component is a working reference for calling `signerManager.signRaw(...)` once you have a selected account.
-- **App shell** ([src/App.tsx](src/App.tsx), [src/App.css](src/App.css)) — header, layout, and theme are intentionally tiny so you can rip them out. The `#root { max-width: 520px }` cap is just a default; widen or remove it for dashboards / multi-column layouts.
-- **Stack additions** — `@parity/product-sdk-chain-client` for chain RPC, `@parity/product-sdk-bulletin` for off-chain storage, `@parity/product-sdk-contracts` for smart contracts, `@parity/product-sdk-statement-store` for P2P pub/sub. See [CLAUDE.md](CLAUDE.md) for the full stack table.
+**In an ordinary browser**, you can write, view statistics and save a draft locally. You don't need a wallet for those features. Shared sprints need a compatible Polkadot host and a connected product account.
 
-When you're ready, deploy your fork to your own `<name>.dot` domain (see below) — no servers, no hosting bill.
+**Inside a Polkadot host**, the app attempts to connect to its product account and use host storage. Sprint rooms use the Product SDK's Statement Store. Review host permission prompts before approving them. See [CLAUDE.md](CLAUDE.md) for the host integration and account model.
 
-## Stack
+## Where your data goes
 
-- **React 19** + **Vite** + **TypeScript**
-- **`@parity/product-sdk-signer`** — Host signer management and app-scoped product-account signing
-- **`@parity/product-sdk-host`** — TruAPI helpers for the Polkadot host (Mobile, Desktop, or Web)
-- **`@novasamatech/host-api`** (+ `@novasamatech/host-api-wrapper`) — TruAPI runtime used underneath the Product SDK packages
+| Feature | Data handling |
+| --- | --- |
+| Text analysis | Counts and clarity calculations happen in the frontend |
+| Browser fallback storage | The draft is saved in this site's `localStorage`, under `wordcounter:text`. It persists across refreshes until cleared or site data is removed |
+| Host storage | The draft is handed to the host's key-value storage API. Storage and protection depend on that host |
+| Sprint rooms | Heartbeats share the account address, display handle, current and starting word counts, timestamps and room timing through the Statement Store. The sprint payload doesn't include the document text |
 
-## Running
+Treat a sprint room code as a way to find a room, not as a private invitation or encryption key. Don't assume its metadata is confidential. The interface's “Nothing leaves this device” footer doesn't describe host storage or networked sprint metadata.
+
+This is a prototype, not a confidential-document vault. Avoid putting passwords, recovery phrases or sensitive documents into it. Clearing the editor removes its saved draft from the active store; clearing local site data doesn't establish deletion from host storage or network recipients.
+
+## Run locally
+
+Use a current supported Node.js release with npm. CI uses Node 22; check the installed Vite package's Node engine requirement when choosing a version.
 
 ```bash
-./setup.sh    # installs deps + fetches the @parity/product-sdk skills
+git clone https://github.com/karam2022/wordclarity.git
+cd wordclarity
+./setup.sh
 npm run dev
 ```
 
-`setup.sh` installs `node_modules/` and pulls the `@parity/product-sdk` skills
-into `.claude/skills/` so AI coding assistants (Claude Code, Cursor, Windsurf,
-Copilot, Gemini) have the Polkadot SDK guidance on hand. The skills are fetched
-from [paritytech/product-sdk](https://github.com/paritytech/product-sdk), not
-committed here, so they stay current — re-run `./setup.sh --refresh` to update
-them. (Plain `npm install` also works if you don't want the skills.)
+Open the local URL printed by Vite. A normal browser is enough to try the editor and its statistics. Host account access and multi-person sprints need separate testing in a compatible Polkadot host.
 
-Runs on `http://localhost:5173`. Must be opened inside a **Polkadot host** (Mobile, Desktop, or Web) for Host API login to work; signing is approved on Polkadot Mobile.
+Before running setup, review [setup.sh](setup.sh). It installs npm dependencies if `node_modules` is absent and fetches Product SDK agent skills into this checkout's `.claude/skills/` if that directory is empty. `./setup.sh --refresh` replaces those project-local skills. It doesn't configure a global assistant installation.
 
-Product-account signing is scoped to the host's current app identifier. Local dev uses the current loopback host, e.g. `localhost:5173`; `.dot.li` gateway URLs are mapped back to their `.dot` product id. Set `VITE_PRODUCT_ACCOUNT_ID` when you need an explicit override.
-
-## Structure
-
-```
-src/
-├── App.tsx       # Header + product account panel + your app shell
-├── utils.ts      # Product SDK signer wrapper + small helpers
-└── main.tsx      # Vite entry
-```
-
-## Deploying
-
-A `/deploy <name>` slash command is wired up for Claude Code users — it runs `playground deploy` (the [Playground CLI](https://github.com/paritytech/playground-cli)) against `<name>.dot` on the Summit network using the phone signer. Standalone:
+## Development checks
 
 ```bash
+npm run typecheck
 npm run build
-playground deploy --env summit --no-build --buildDir dist --domain <name>.dot --signer phone --playground
+npm run preview
 ```
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the full walkthrough (forking, the Playground CLI, phone vs. mnemonic signing). Maintainers deploying the canonical `playground-template.dot` instance: see [DEPLOY_SUMMIT.md](DEPLOY_SUMMIT.md).
+The first two commands match the PR checks in [CI](.github/workflows/ci.yml). Preview serves the production build locally. There's no dedicated automated test suite configured in `package.json`.
 
-## Ideas for modding
+## Find your way around
 
-### Beginner — UI and frontend
+| File | Responsibility |
+| --- | --- |
+| [src/App.tsx](src/App.tsx) | Editor, text statistics, clarity heuristics and sprint interface |
+| [src/pdk.tsx](src/pdk.tsx) | Host storage, local fallback and account badge |
+| [src/room.tsx](src/room.tsx) | Sprint rooms, heartbeat payloads, timer and leaderboard |
+| [src/utils.ts](src/utils.ts) | Product-account and host resource integration |
+| [src/App.css](src/App.css) | Application styles |
 
-- Reskin it — change colours, typography, visual style
-- Rename everything — app name, labels, descriptions
-- Add a tagline and hero section
-- Make it mobile-first
-- Add dark/light mode toggle
-- Add a second language
-- Design a custom empty state
-
-### Intermediate — storage and data
-
-- Add a new data field stored on decentralised storage
-- Add rich text editing
-- Add image upload stored on decentralised storage
-- Add a comments section using Statement Store
-- Add client-side search and filter
-- Add pagination
-- Add timestamps
-- Add data export as JSON
-
-### Advanced — smart contracts (requires [CDM](https://github.com/paritytech/contract-dependency-manager)/Rust, laptop required)
-
-- Enforce a character limit at contract level
-- Add item expiry after a set number of blocks
-- Add a cap on total submissions
-- Add PoP gating — only verified humans can participate
-- Add an allowlist of approved accounts
-- Add an admin-only moderation function
-- Change the voting or selection mechanic
-- Add a contract event so the UI can react in real time
-- Require multi-sig approval
-
-### Advanced — multiplayer and cross-account
-
-- Add a challenge mechanic via Statement Store
-- Add an on-chain leaderboard
-- Add Statement Store notifications
-- Add a tipping mechanic using PGAS
-
-## Security
-
-> [!WARNING]
-> The following is a prototype, reference implementation, and proof-of-concept. This open source code is provided for research, experimentation, and developer education only. This code has not been audited, is actively experimental, and may contain bugs, vulnerabilities, or incomplete features. Use at your own risk.
-
-This is a reference proof-of-concept, **not a hardened production build**. Before
-deploying it for any real use case, you are responsible for:
-
-- Reviewing the code yourself.
-- Checking that dependencies are up to date and free of known vulnerabilities.
-- Securing your own fork or deployment environment (keys, secrets, network configuration).
-- Tracking the latest tagged release / commits for security fixes — older releases
-  are not backported (exceptions might apply).
-
-For Parity's security disclosure process and Bug Bounty program, see
-[parity.io/bug-bounty](https://parity.io/bug-bounty).
+AI coding assistants should follow [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md), including the required setup step. Deployment notes in [DEPLOYMENT.md](DEPLOYMENT.md) and [DEPLOY_SUMMIT.md](DEPLOY_SUMMIT.md) are inherited from the Playground starter. They aren't proof of a live WordClarity deployment. Review their domains and configuration before deploying.
 
 ## License
 
-Licensed under the [GNU General Public License v3.0 or later](./LICENSE) (`GPL-3.0-or-later`).
+See [LICENSE](LICENSE) for the repository's license terms.
