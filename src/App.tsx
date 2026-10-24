@@ -265,7 +265,8 @@ function SprintPanel({ words }: { words: number }) {
                     </ol>
                 )}
                 <p className="sprint-foot">
-                    Live race — only your word count is shared, never your text.
+                    Sprint updates share your account address, display name,
+                    word counts and timing, without your draft text.
                 </p>
             </section>
         );
@@ -341,8 +342,8 @@ function SprintPanel({ words }: { words: number }) {
                         </button>
                     </div>
                     <p className="sprint-foot">
-                        Race others in real time. Only your word count is shared,
-                        never your text.
+                        Joining shares your account address, display name, word
+                        counts and timing, without your draft text.
                     </p>
                 </>
             )}
@@ -540,7 +541,10 @@ export default function App() {
             </main>
 
             <footer className="app-footer">
-                Saved locally in your browser. Nothing leaves this device.
+                Drafts use host storage when available, otherwise this browser.
+                Joining a sprint shares your account address, display name, word
+                counts and timing through Polkadot's Statement Store. Sprint
+                updates don't include your draft text.
             </footer>
         </div>
     );
