@@ -31,7 +31,7 @@ The clarity checks run in the app. There's no language-model API behind the phra
 | Host storage | The draft is handed to the host's key-value storage API. Storage and protection depend on that host |
 | Sprint rooms | Heartbeats share the account address, display handle, current and starting word counts, timestamps and room timing through the Statement Store. The sprint payload doesn't include the document text |
 
-Treat a sprint room code as a way to find a room, not as a private invitation or encryption key. Don't assume its metadata is confidential. The interface's “Nothing leaves this device” footer doesn't describe host storage or networked sprint metadata.
+Treat a sprint room code as a way to find a room, not as a private invitation or encryption key. Don't assume its metadata is confidential.
 
 This is a prototype, not a confidential-document vault. Avoid putting passwords, recovery phrases or sensitive documents into it. Clearing the editor removes its saved draft from the active store; clearing local site data doesn't establish deletion from host storage or network recipients.
 
